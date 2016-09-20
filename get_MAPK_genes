@@ -1,0 +1,47 @@
+setwd("D:\\importantbk\\working\\lab_working\\wangwei")
+
+##the format of "MAPK.txt' are like follows:
+
+##hsa:10000            AKT3, MPPH, MPPH2, PKB-GAMMA, PKBG, PRKBG, RAC-PK-gamma, RAC-gamma, STK-2; AKT serine/threonine kina 
+##hsa:100137049        PLA2G4B, HsT16992, cPLA2-beta; phospholipase A2 group IVB (EC:3.1.1.4); K16342 cytosolic phospholipa 
+##hsa:100506012        PPP5D1; PPP5 tetratricopeptide repeat domain containing 1; K04460 serine/threonine-protein phosphata 
+##hsa:10125            RASGRP1, CALDAG-GEFI, CALDAG-GEFII, RASGRP, V, hRasGRP1; RAS guanyl releasing protein 1; K04350 RAS  
+##hsa:10235            RASGRP2, CALDAG-GEFI, CDC25L; RAS guanyl releasing protein 2; K12361 RAS guanyl-releasing protein 2 
+##hsa:10368            CACNG3; calcium voltage-gated channel auxiliary subunit gamma 3; K04868 voltage-dependent calcium ch 
+##hsa:10369            CACNG2, MRD10; calcium voltage-gated channel auxiliary subunit gamma 2; K04867 voltage-dependent cal 
+
+## This file is arrange to view neatly, and the first 21 character (include hsa:xxxx) is set to align the format, so when we read this file we should notice this feature.
+
+tab <- read.fwf(file = "MAPK.txt", width = c(21,20), stringsAsFactor = F, header = F)
+
+head(tab)
+
+##                     V1                   V2
+##1 hsa:10000             AKT3, MPPH, MPPH2, P
+##2 hsa:100137049         PLA2G4B, HsT16992, c
+##3 hsa:100506012         PPP5D1; PPP5 tetratr
+##4 hsa:10125             RASGRP1, CALDAG-GEFI
+##5 hsa:10235             RASGRP2, CALDAG-GEFI
+##6 hsa:10368             CACNG3; calcium volt
+
+## here we just want to extract the first gene names of the V2 column
+
+for (i in 1:length(tab$V1)){
+  tab[i,3] <- unlist(strsplit(tab[i,2], "[,;]"))[1]
+}
+
+write.table(tab$V3, file = "MAPK_genes.txt", col.names = F, row.names = F, quote = F)
+
+
+
+
+## read the expression tables
+
+exp_tab <- read.csv(file = "expression_tab.txt", sep = "\t", stringsAsFactor = F)
+
+length(intersect(exp_tab$Gene.Symbol, tab$V3))
+
+##11
+
+##it means that there are 11 genes in MAPK pathway and also in our DEG lists
+
