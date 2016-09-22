@@ -70,4 +70,3 @@ pv.out <- pathview(gene.data=gene_data, gene.idtype="SYMBOL",pathway.id="04010",
 ## kegg figure reference
 ## http://www.kegg.jp/kegg-bin/highlight_pathway?scale=1.0&map=hsa04010&keyword=04010
 
-
