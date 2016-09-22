@@ -54,7 +54,20 @@ write.table(MAPK_tab, file = "MAPK_expression.txt", sep = "\t", col.names = T, r
 
 ## generate the pathway view
 library(pathview)
-gene.data <- MAPK_tab$Log.Fold.change
-names(gene.data) <- MAPK_tab$Gene.Symbol
+gene_data <- exp_tab$Log.Fold.change
+names(gene_data) <- exp_tab$Gene.Symbol
 ##pv.out <- pathview(gene.data=gene.data, pathway.id="hsa04010", species="hsa", out.suffix="pathview.hsa04110.Ctrl1", kegg.native=TRUE)
-pv.out <- pathview(gene.data=gene.data, pathway.id="hsa04010", species="hsa", kegg.native=TRUE)
+## notice here:
+## 1. pathway.id is specified as "04010" or a list of id numbers
+## 2. need to specify the map identifiers, here we use gene symbol, so we have to use gene.idtype="SYMBOL"
+## 3. all the specification list is as follows:
+##> gene.idtype.list
+##[1] "SYMBOL" "GENENAME" "ENSEMBL" "ENSEMBLPROT" "UNIGENE"
+##[6] "UNIPROT" "ACCNUM" "ENSEMBLTRANS" "REFSEQ" "ENZYME"
+##[11] "TAIR" "PROSITE" "ORF"
+pv.out <- pathview(gene.data=gene_data, gene.idtype="SYMBOL",pathway.id="04010", species="hsa", kegg.native=TRUE)
+
+## kegg figure reference
+## http://www.kegg.jp/kegg-bin/highlight_pathway?scale=1.0&map=hsa04010&keyword=04010
+
+
