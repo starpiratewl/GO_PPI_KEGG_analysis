@@ -216,6 +216,7 @@ re_tab <- read.csv(file = "final_tab.txt", sep = "\t", stringsAsFactor = F)
 ##############################################################################################################
 
 
+
 ## number of nods
 length(union(unique(re_tab[,3]),unique(re_tab[,4])))
 
