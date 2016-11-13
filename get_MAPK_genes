@@ -1,4 +1,4 @@
-setwd("D:\\importantbk\\working\\lab_working\\wangwei")
+setwd("D:\\wangwei")
 
 ##the format of "MAPK.txt' are like follows:
 
@@ -69,4 +69,47 @@ pv.out <- pathview(gene.data=gene_data, gene.idtype="SYMBOL",pathway.id="04010",
 
 ## kegg figure reference
 ## http://www.kegg.jp/kegg-bin/highlight_pathway?scale=1.0&map=hsa04010&keyword=04010
+
+
+
+
+
+###############################################
+## interested PPI
+###############################################
+
+
+
+exp_tab <- read.csv(file = "expression_tab.txt", sep = "\t", stringsAsFactor = F)
+
+filter_tab <- exp_tab[exp_tab$Fold.change > 1.5 | exp_tab$Fold.change < -1.5, ]
+
+library(biomaRt)
+
+
+mart <- useMart("ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl", host="www.ensembl.org")
+
+genelist <- filter_tab$Gene.Symbol
+
+results_genelist <- getBM(attributes = c("ensembl_gene_id", "ensembl_transcript_id", "ensembl_peptide_id","external_gene_name"),filters = "external_gene_name", genelist, mart = mart)
+
+
+
+feikong_related <- results_genelist[results_genelist$ensembl_peptide_id != "",]
+write.table(feikong_related, file = "gene_pepid_list.txt",row.names = F, col.names = T, quote = F)
+write.table(feikong_related$ensembl_peptide_id, file = "pepid_related_list.txt", row.names = F, col.names = F, quote = F)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
