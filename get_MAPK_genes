@@ -78,7 +78,7 @@ pv.out <- pathview(gene.data=gene_data, gene.idtype="SYMBOL",pathway.id="04010",
 ## interested PPI
 ###############################################
 
-
+setwd("D:\\wangwei")
 
 exp_tab <- read.csv(file = "expression_tab.txt", sep = "\t", stringsAsFactor = F)
 
@@ -114,6 +114,143 @@ while read pep; do grep -w $pep linkbase.txt;done > gene_pep_filtered_links.txt 
 
 
 
+
+setwd("D:\\wangwei")
+
+library(biomaRt)
+
+mart <- useMart("ENSEMBL_MART_ENSEMBL", dataset = "hsapiens_gene_ensembl", host="www.ensembl.org")
+
+
+result_links <- read.csv(file = "gene_pep_filtered_links.txt", header = F, stringsAsFactor = F, sep = "\t")
+
+nonre1 <- unique(as.character(factor(result_links [,1])))
+nonre2 <- unique(as.character(factor(result_links [,2])))
+
+nonre <- c(nonre1 , nonre2 )
+
+write.table(nonre , file ="nonredundant_id.txt", row.names = F, col.names = F)
+
+## nonre <- read.table(file = "nonredundant_id.txt", header = F, stringsAsFactor = F)$V1
+
+results_id <- getBM(attributes = c("ensembl_gene_id", "ensembl_transcript_id", "ensembl_peptide_id","external_gene_name"),filters = "ensembl_peptide_id", nonre , mart = mart)
+
+mappinglist <- results_id[,c(3,4)]
+
+write.table(mappinglist, file = “mappinglist.txt", row.names = F, col.names = F)
+
+
+test1 <- merge(result_links, mappinglist, by.x = "V1", by.y = "ensembl_peptide_id", all.x = TRUE)
+
+
+test2 <- merge(test1, mappinglist, by.x = "V2", by.y = "ensembl_peptide_id", all = F)
+
+relation_table <- test2[,-c(1,2)]
+
+
+
+
+
+##the relation table has duplications, for example, in PPI relation tables, we consider A-B and B-A are duplications
+relation_table_f <- relation_table[duplicated(apply(cbind(relation_table$external_gene_name.x, relation_table$external_gene_name.y), 1, function(x) paste(min(x), max(x)))),]
+
+relation_table_nona <- relation_table_f[!is.na(relation_table_f$external_gene_name.x),]
+relation_table_nona <- relation_table_nona[!is.na(relation_table_nona$external_gene_name.y),]
+
+
+## unique the tables
+relation_table_f_u <- unique(relation_table_nona)
+
+write.table(relation_table_f_u, file = "clean.txt", sep = "\t", col.names = T, row.names = F)
+
+
+
+##genelist is the genes we want to confine to.
+## this step will filter the relation of genes confined to our genelist.(both genes are in our genelist)
+for (i in 1:length(relation_table_f_u[,1])){if (relation_table_f_u[i,5] %in% genelist == "TRUE" || relation_table_f_u[i,6] %in% genelist == "TRUE")  {relation_table_f_u[i,7] <- "one"}}
+for (i in 1:length(relation_table_f_u[,1])){if (relation_table_f_u[i,5] %in% genelist == "TRUE" && relation_table_f_u[i,6] %in% genelist == "TRUE")  {relation_table_f_u[i,7] <- "T"}}
+
+clean_tab <- relation_table_f_u[relation_table_f_u$V7 == "T",]
+
+write.table(clean_tab, file = "clean_tab.txt", sep ="\t", col.names = T, row.names = F, quote = F)
+
+
+####################################
+## understanding the relation table
+####################################
+setwd("D:\\wangwei")
+tab <- read.csv(file = "clean_tab.txt", sep = "\t", stringsAsFactor = F)
+head(tab)
+
+table(tab$V3)
+##activation    binding  catalysis expression inhibition      ptmod   reaction 
+##        61        216         62         20         14         11         94 
+table(tab$V4)
+##           activation inhibition 
+##       389         61         28
+
+
+tab_clean <- tab[,-c(2,3)]
+
+tab_clean_f <- tab_clean[duplicated(apply(cbind(tab_clean$external_gene_name.x, tab_clean$external_gene_name.y), 1, function(x) paste(min(x), max(x)))),]
+
+
+
+write.table(tab_clean_f, file = "final_tab.txt", col.names = T, row.names = F, quote = F, sep = "\t")
+
+
+
+
+
+
+############################################################################################################################
+## make the decoration data table for cytoscape
+############################################################################################################################
+
+#### 1 , count the number of edges of each node
+
+re_tab <- read.csv(file = "final_tab.txt", sep = "\t", stringsAsFactor = F)
+
+##############################################################################################################
+## this time we use the action table, so the result is still a little strange, and we have to trim it again
+##############################################################################################################
+
+
+## number of nods
+length(union(unique(re_tab[,3]),unique(re_tab[,4])))
+
+## number of connections overall
+dim(re_tab)[1]
+
+## number of connections of each nod
+
+number <- rep(NA, length(union(unique(re_tab[,3]),unique(re_tab[,4]))))
+
+con_tab <- cbind(union(unique(re_tab[,3]),unique(re_tab[,4])), number)
+
+genes <- union(unique(re_tab[,3]),unique(re_tab[,4]))
+
+for (i in 1:length(union(unique(re_tab[,3]),unique(re_tab[,4])))){
+	con_tab[i,2] <- length(which(re_tab[,3] == con_tab[i,1])) + length(which(re_tab[,4] == con_tab[i,1]))
+}
+
+write.table(con_tab, file = "number_of_nods.txt", quote = F, col.names = F, row.names = F, sep = "\t")
+
+
+#### 2 , incorporate expression levels of each node(each gene)
+
+## add head of the the con_tab(GeneSymbol, counts)
+
+deco_tab <- read.csv(file = "number_of_nods.txt", sep = "\t", stringsAsFactor = F)
+
+exp_tab <- read.csv(file = "expression_tab.txt", stringsAsFactor = F, sep = "\t")
+
+
+test1 <- merge(deco_tab,exp_tab, by.x = "V1", by.y = "Gene.Symbol", all.x = TRUE)
+
+
+
+write.table(test1[,c(1,6)], file = "decoration_tables.txt", col.names = T, row.names = F)
 
 
 
