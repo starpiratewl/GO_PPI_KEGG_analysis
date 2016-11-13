@@ -100,9 +100,15 @@ write.table(feikong_related, file = "gene_pepid_list.txt",row.names = F, col.nam
 write.table(feikong_related$ensembl_peptide_id, file = "pepid_related_list.txt", row.names = F, col.names = F, quote = F)
 
 
+#############
+##in linux
+#############
+dos2unix 9606.protein.actions.v10.txt
+dos2unix pepid_related_list.txt
 
+sed 's/9606.//g' 9606.protein.actions.v10.txt > linkbase.txt
 
-
+while read pep; do grep -w $pep linkbase.txt;done > gene_pep_filtered_links.txt < pepid_related_list.txt
 
 
 
