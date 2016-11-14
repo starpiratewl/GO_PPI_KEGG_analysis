@@ -242,7 +242,7 @@ write.table(con_tab, file = "number_of_nods.txt", quote = F, col.names = F, row.
 
 ## add head of the the con_tab(GeneSymbol, counts)
 
-deco_tab <- read.csv(file = "number_of_nods.txt", sep = "\t", stringsAsFactor = F)
+deco_tab <- read.csv(file = "number_of_nods.txt", sep = "\t", stringsAsFactor = F, header = F)
 
 exp_tab <- read.csv(file = "expression_tab.txt", stringsAsFactor = F, sep = "\t")
 
