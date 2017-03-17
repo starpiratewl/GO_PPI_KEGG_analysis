@@ -1,0 +1,14 @@
+setwd("E://wangwei")
+
+mapk <- read.table(file = "MAPK.txt", sep = "\t", stringsAsFactor = F， header = FALSE)
+
+mapk <- mapk[]
+
+
+
+
+
+
+
+
+
