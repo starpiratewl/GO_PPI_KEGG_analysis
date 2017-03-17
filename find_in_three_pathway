@@ -1,14 +1,49 @@
 setwd("E://wangwei")
 
-mapk <- read.table(file = "MAPK.txt", sep = "\t", stringsAsFactor = F， header = FALSE)
+mapk <- read.csv(file = "MAPK.txt", sep = "\t", stringsAsFactor = F)
 
-mapk <- mapk[]
+changdu <- 1:dim(mapk)[1]
+
+mapks <- mapk[changdu %% 2 == 0,]
+
+mapk_list <- unlist(lapply(strsplit(mapks,";"), function(x){x[1]}))
 
 
 
 
 
+P53 <- read.csv(file = "P53.txt", sep = "\n", stringsAsFactor = F)
+
+changdu <- 1:dim(P53)[1]
+
+P53s <- P53[changdu %% 2 == 0,]
+
+P53_list <- unlist(lapply(strsplit(P53s,";"), function(x){x[1]}))
 
 
+
+
+
+PI3K_AKT <- read.csv(file = "PI3K_AKT.txt", sep = "\t", stringsAsFactor = F)
+
+changdu <- 1:dim(PI3K_AKT)[1]
+
+PI3K_AKTs <- PI3K_AKT[changdu %% 2 == 0,]
+
+PI3K_AKT_list <- unlist(lapply(strsplit(PI3K_AKTs,";"), function(x){x[1]}))
+
+
+
+
+
+ourlist <- read.csv(file = "genelist.txt", sep = "\t", stringsAsFactor = F)$XX
+
+
+intersect(ourlist, mapk_list)
+## [1] "CACNA2D3" "DDIT3"    "ATF4"     "IKBKB"    "HSPA1L"   "HSPA1B"   "HSPA1A"   "RAP1A"    "GADD45B"  "GADD45A"  "HSPA8"    "HSPA2"   
+intersect(ourlist, P53_list)
+## [1] "SERPINB5" "SESN2"    "GADD45B"  "GADD45A"  "SIAH1"    "PERP"     "PMAIP1"   "THBS1"   
+intersect(ourlist, PI3K_AKT_list)
+## [1] "DDIT4"    "ATF4"     "IKBKB"    "JAK3"     "EIF4EBP1" "ITGB8"    "PCK2"     "VEGFA"    "IL6"      "PPP2R5C"  "THBS1"   
 
 
