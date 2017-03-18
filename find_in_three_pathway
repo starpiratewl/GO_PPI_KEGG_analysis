@@ -35,7 +35,7 @@ PI3K_AKT_list <- unlist(lapply(strsplit(PI3K_AKTs,";"), function(x){x[1]}))
 
 
 
-
+exp_tab <- read.csv(file = "genelist.txt", sep = "\t", stringsAsFactor = F)
 ourlist <- read.csv(file = "genelist.txt", sep = "\t", stringsAsFactor = F)$XX
 
 
@@ -45,5 +45,62 @@ intersect(ourlist, P53_list)
 ## [1] "SERPINB5" "SESN2"    "GADD45B"  "GADD45A"  "SIAH1"    "PERP"     "PMAIP1"   "THBS1"   
 intersect(ourlist, PI3K_AKT_list)
 ## [1] "DDIT4"    "ATF4"     "IKBKB"    "JAK3"     "EIF4EBP1" "ITGB8"    "PCK2"     "VEGFA"    "IL6"      "PPP2R5C"  "THBS1"   
+
+mapkk <- intersect(ourlist, mapk_list)
+P533 <- intersect(ourlist, P53_list)
+PI3KK <- intersect(ourlist, PI3K_AKT_list)
+
+ 
+mapkk_tab <- exp_tab[exp_tab$XX %in% mapkk, ]
+P533_tab <- exp_tab[exp_tab$XX %in% P533, ]
+PI3KK_tab <- exp_tab[exp_tab$XX %in% PI3KK, ]
+
+
+
+
+library(pathview)
+
+mapkk_gene_data <- mapkk_tab$Log.Fold.change
+names(mapkk_gene_data) <- mapkk_tab$XX
+
+##pv.out <- pathview(gene.data=gene.data, pathway.id="hsa04010", species="hsa", out.suffix="pathview.hsa04110.Ctrl1", kegg.native=TRUE)
+## notice here:
+## 1. pathway.id is specified as "04010" or a list of id numbers
+## 2. need to specify the map identifiers, here we use gene symbol, so we have to use gene.idtype="SYMBOL"
+## 3. all the specification list is as follows:
+##> gene.idtype.list
+##[1] "SYMBOL" "GENENAME" "ENSEMBL" "ENSEMBLPROT" "UNIGENE"
+##[6] "UNIPROT" "ACCNUM" "ENSEMBLTRANS" "REFSEQ" "ENZYME"
+##[11] "TAIR" "PROSITE" "ORF"
+pv.out <- pathview(gene.data=mapkk_gene_data, gene.idtype="SYMBOL",pathway.id="04010", species="hsa", kegg.native=TRUE)
+
+## kegg figure reference
+## http://www.kegg.jp/kegg-bin/highlight_pathway?scale=1.0&map=hsa04010&keyword=04010
+
+
+
+P533_gene_data <- P533_tab$Log.Fold.change
+names(P533_gene_data) <- P533_tab$XX
+pv.out <- pathview(gene.data=P533_gene_data, gene.idtype="SYMBOL",pathway.id="04115", species="hsa", kegg.native=TRUE)
+
+
+
+
+
+PI3KK_gene_data <- PI3KK_tab$Log.Fold.change
+names(PI3KK_gene_data) <- PI3KK_tab$XX
+pv.out <- pathview(gene.data=PI3KK_gene_data, gene.idtype="SYMBOL",pathway.id="04151", species="hsa", kegg.native=TRUE)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
