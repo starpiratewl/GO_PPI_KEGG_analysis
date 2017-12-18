@@ -79,16 +79,22 @@ entrezIDs <- mget(genes, org.Hs.egSYMBOL2EG, ifnotfound=NA)
 entrezIDs <- as.character(entrezIDs)
 ## write.table(entrezIDs, file = "re_entrezIDs.txt", sep = "\t", col.names = F, row.names = F , quote = F)
 
-genes <- c(genes, "MATN3")
 
+matn3_all <- read.csv(file = "matn3.txt", sep = "\t", stringsAsFactors = F)
+entrezIDs <- matn3_all[,3][!is.na(matn3_all[,3])]
 
+entrezIDs <- c(entrezIDs, "4148")
 
 keggAnn <- get("org.Hs.egPATH")
 universe <- Lkeys(keggAnn)
+
+entrezIDs <- entrezIDs[entrezIDs %in% universe]
+
+
 params <- new("KEGGHyperGParams", 
 geneIds=entrezIDs, 
 universeGeneIds=universe, 
-annotation="org.Mm.eg.db", 
+annotation="org.Hs.eg.db", 
 categoryName="KEGG", 
 pvalueCutoff=0.05,
 testDirection="over")
@@ -107,7 +113,7 @@ paste(.sym, collapse=";")
 kegg$Symbols <- glist[as.character(kegg$KEGGID)]
 
 
-write.table(kegg, file = paste(m,"_kegg.tab",sep=""), row.names = F, quote = F, sep = "\t")
+write.table(kegg, file = "matn3_kegg.txt", row.names = F, quote = F, sep = "\t")
 
 
 
@@ -117,9 +123,6 @@ gene.data <- as.numeric(allgenes[,2])
 names(gene.data) <- gEns
 
 for(i in 1:length(kegg$KEGGID)){pv.out <- pathview(gene.data, pathway.id=as.character(kegg$KEGGID)[i], species="mmu", out.suffix="pathview", kegg.native=T,same.layer = F)}
-
-}
-
 
 
 
