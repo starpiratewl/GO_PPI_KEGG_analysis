@@ -1,0 +1,214 @@
+setwd("D:\\wangliang\\project\\ww\\201712pathway")
+
+matn3_list <- read.csv(file = "matn3.txt", sep = "\t", stringsAsFactors = F)
+
+
+library("org.Hs.eg.db")
+library("GSEABase")
+library("GOstats")
+
+
+
+
+## GO
+
+tab <- read.csv(file = paste(m,".txt",sep=""), header = T, stringsAsFactor = F, sep="\t")
+allgenes <- cbind(tab$GeneSymbol,tab$foldchange)
+allgenes <- allgenes[!is.na(allgenes[,1]),]
+
+
+upgenes <- tab[tab$foldchange > 1,]
+upgenes <- upgenes$GeneSymbol
+upgenes <- upgenes[!is.na(upgenes)]
+
+
+downgenes <- tab[tab$foldchange < 1,]
+downgenes <- downgenes$GeneSymbol
+downgenes <- downgenes[!is.na(downgenes)]
+
+
+##up_GO
+df=c()
+goAnn <- get("org.Mm.egGO")
+universe <- Lkeys(goAnn)
+
+Genes = c()
+
+genes=upgenes
+entrezIDs <- mget(genes, org.Mm.egSYMBOL2EG, ifnotfound=NA)
+entrezIDs <- as.character(entrezIDs)
+params <- new("GOHyperGParams",
+		 geneIds=entrezIDs,
+		 universeGeneIds=universe,
+		 annotation="org.Mm.eg.db",
+		 ontology="BP",
+		 pvalueCutoff=0.01,
+		 conditional=FALSE,
+		 testDirection="over")
+over <- hyperGTest(params)
+bp <- summary(over)
+df=rbind(df,bp)
+
+for (i in df$GOBPID){
+	e<-mget(i, org.Mm.egGO2ALLEGS)
+	t<-lapply(e,function(.ele,x){intersect(as.character(x),.ele)}, entrezIDs)
+	names(t) <- NULL
+	Termgenes <- mget(unlist(t), org.Mm.egSYMBOL, ifnotfound=NA)
+	Genes = c(Genes,paste0(unlist(Termgenes), collapse = ";"))
+	#Genes[which(df$GOBPID == i )] = paste0(unlist(Termgenes), collapse = ";")
+	
+}
+
+df=cbind(df,Genes)
+
+df$Genes = Genes
+
+write.table(df,file=paste(m,"_up_GOresult.tab",sep=""),quote=F,row.names=F,sep="\t")
+
+
+
+
+
+
+
+
+## KEGG
+
+genes <- matn3_list[,1]
+entrezIDs <- mget(genes, org.Hs.egSYMBOL2EG, ifnotfound=NA)
+entrezIDs <- as.character(entrezIDs)
+## write.table(entrezIDs, file = "re_entrezIDs.txt", sep = "\t", col.names = F, row.names = F , quote = F)
+
+genes <- c(genes, "MATN3")
+
+
+
+keggAnn <- get("org.Hs.egPATH")
+universe <- Lkeys(keggAnn)
+params <- new("KEGGHyperGParams", 
+geneIds=entrezIDs, 
+universeGeneIds=universe, 
+annotation="org.Mm.eg.db", 
+categoryName="KEGG", 
+pvalueCutoff=0.05,
+testDirection="over")
+
+over <- hyperGTest(params)
+kegg <- summary(over)
+library(Category)
+glist <- geneIdsByCategory(over)
+glist <- sapply(glist, function(.ids) {
+.sym <- mget(.ids, envir=org.Mm.egSYMBOL, ifnotfound=NA)
+.sym[is.na(.sym)] <- .ids[is.na(.sym)]
+paste(.sym, collapse=";")
+})
+
+
+kegg$Symbols <- glist[as.character(kegg$KEGGID)]
+
+
+write.table(kegg, file = paste(m,"_kegg.tab",sep=""), row.names = F, quote = F, sep = "\t")
+
+
+
+gIds <- mget(genes, org.Mm.egSYMBOL2EG, ifnotfound=NA)
+gEns <- unlist(gIds)
+gene.data <- as.numeric(allgenes[,2])
+names(gene.data) <- gEns
+
+for(i in 1:length(kegg$KEGGID)){pv.out <- pathview(gene.data, pathway.id=as.character(kegg$KEGGID)[i], species="mmu", out.suffix="pathview", kegg.native=T,same.layer = F)}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+## pathview
+
+mapk <- read.csv(file = "MAPK.txt", sep = "\t", stringsAsFactor = F)
+changdu <- 1:dim(mapk)[1]
+mapks <- mapk[changdu %% 2 == 0,]
+mapk_list <- unlist(lapply(strsplit(mapks,";"), function(x){x[1]}))
+
+
+
+P53 <- read.csv(file = "P53.txt", sep = "\n", stringsAsFactor = F)
+changdu <- 1:dim(P53)[1]
+P53s <- P53[changdu %% 2 == 0,]
+P53_list <- unlist(lapply(strsplit(P53s,";"), function(x){x[1]}))
+
+
+
+PI3K_AKT <- read.csv(file = "PI3K_AKT.txt", sep = "\t", stringsAsFactor = F)
+changdu <- 1:dim(PI3K_AKT)[1]
+PI3K_AKTs <- PI3K_AKT[changdu %% 2 == 0,]
+PI3K_AKT_list <- unlist(lapply(strsplit(PI3K_AKTs,";"), function(x){x[1]}))
+
+
+exp_tab <- read.csv(file = "genelist.txt", sep = "\t", stringsAsFactor = F)
+ourlist <- read.csv(file = "genelist.txt", sep = "\t", stringsAsFactor = F)$XX
+
+
+intersect(ourlist, mapk_list)
+## [1] "CACNA2D3" "DDIT3"    "ATF4"     "IKBKB"    "HSPA1L"   "HSPA1B"   "HSPA1A"   "RAP1A"    "GADD45B"  "GADD45A"  "HSPA8"    "HSPA2"   
+intersect(ourlist, P53_list)
+## [1] "SERPINB5" "SESN2"    "GADD45B"  "GADD45A"  "SIAH1"    "PERP"     "PMAIP1"   "THBS1"   
+intersect(ourlist, PI3K_AKT_list)
+## [1] "DDIT4"    "ATF4"     "IKBKB"    "JAK3"     "EIF4EBP1" "ITGB8"    "PCK2"     "VEGFA"    "IL6"      "PPP2R5C"  "THBS1"   
+
+
+mapkk <- intersect(ourlist, mapk_list)
+P533 <- intersect(ourlist, P53_list)
+PI3KK <- intersect(ourlist, PI3K_AKT_list)
+
+ 
+mapkk_tab <- exp_tab[exp_tab$XX %in% mapkk, ]
+P533_tab <- exp_tab[exp_tab$XX %in% P533, ]
+PI3KK_tab <- exp_tab[exp_tab$XX %in% PI3KK, ]
+
+
+
+library(pathview)
+
+mapkk_gene_data <- mapkk_tab$Log.Fold.change
+names(mapkk_gene_data) <- mapkk_tab$XX
+
+##pv.out <- pathview(gene.data=gene.data, pathway.id="hsa04010", species="hsa", out.suffix="pathview.hsa04110.Ctrl1", kegg.native=TRUE)
+## notice here:
+## 1. pathway.id is specified as "04010" or a list of id numbers
+## 2. need to specify the map identifiers, here we use gene symbol, so we have to use gene.idtype="SYMBOL"
+## 3. all the specification list is as follows:
+##> gene.idtype.list
+##[1] "SYMBOL" "GENENAME" "ENSEMBL" "ENSEMBLPROT" "UNIGENE"
+##[6] "UNIPROT" "ACCNUM" "ENSEMBLTRANS" "REFSEQ" "ENZYME"
+##[11] "TAIR" "PROSITE" "ORF"
+pv.out <- pathview(gene.data=mapkk_gene_data, gene.idtype="SYMBOL",pathway.id="04010", species="hsa", kegg.native=TRUE)
+
+## kegg figure reference
+## http://www.kegg.jp/kegg-bin/highlight_pathway?scale=1.0&map=hsa04010&keyword=04010
+
+
+
+P533_gene_data <- P533_tab$Log.Fold.change
+names(P533_gene_data) <- P533_tab$XX
+pv.out <- pathview(gene.data=P533_gene_data, gene.idtype="SYMBOL",pathway.id="04115", species="hsa", kegg.native=TRUE)
+
+
+
+PI3KK_gene_data <- PI3KK_tab$Log.Fold.change
+names(PI3KK_gene_data) <- PI3KK_tab$XX
+pv.out <- pathview(gene.data=PI3KK_gene_data, gene.idtype="SYMBOL",pathway.id="04151", species="hsa", kegg.native=TRUE)
+
+
+
+
+
