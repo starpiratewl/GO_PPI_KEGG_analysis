@@ -9,7 +9,7 @@ library("GOstats")
 
 
 
-
+############################################################################################################
 ## GO
 
 tab <- read.csv(file = paste(m,".txt",sep=""), header = T, stringsAsFactor = F, sep="\t")
@@ -71,7 +71,7 @@ write.table(df,file=paste(m,"_up_GOresult.tab",sep=""),quote=F,row.names=F,sep="
 
 
 
-
+############################################################################################################
 ## KEGG
 
 genes <- matn3_list[,1]
@@ -126,6 +126,35 @@ for(i in 1:length(kegg$KEGGID)){pv.out <- pathview(gene.data, pathway.id=as.char
 
 
 
+############################################################################################################
+## kegg.db has not supported officially, so we have to turn to other packages for the kegg enrichment analysis
+
+
+############################################################################################################
+## option 1  -----   clusterProfiler
+source("http://bioconductor.org/biocLite.R")
+biocLite("clusterProfiler")
+
+
+setwd("D:\\")
+ 
+a=read.table("testgeneid.txt",header = FALSE)
+ 
+require(DOSE)
+ 
+require(clusterProfiler)
+ 
+gene=as.character(a[,1])
+ 
+ego <- enrichGO(gene=gene,'org.Hs.eg.db',ont="BP",pvalueCutoff=0.01,readable=TRUE)
+ 
+ekk <- enrichKEGG(gene=gene,organism = "hsa",pAdjustMethod = "BH",pvalueCutoff=0.01)
+ 
+write.csv(summary(ekk),"KEGG-enrich.csv",row.names =F)
+ 
+write.csv(summary(ego),"GO-enrich.csv",row.names =F)
+barplot(ego, showCategory=15,title="EnrichmentGO") #条形图
+dotplot(ego,title="EnrichmentGO_dot")
 
 
 
@@ -135,6 +164,15 @@ for(i in 1:length(kegg$KEGGID)){pv.out <- pathview(gene.data, pathway.id=as.char
 
 
 
+
+
+
+
+
+
+
+
+############################################################################################################
 ## pathview
 
 mapk <- read.csv(file = "MAPK.txt", sep = "\t", stringsAsFactor = F)
