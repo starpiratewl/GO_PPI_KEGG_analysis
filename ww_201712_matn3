@@ -243,8 +243,10 @@ biocLite("clusterProfiler")
 ###################################################################
 ## clusterProfiler codes
 ###################################################################
-setwd("D:\\")
- 
+setwd("D:\\wangliang\\project\\ww\\201712pathway")
+
+library(clusterProfiler)
+
 a=read.table("testgeneid.txt",header = FALSE)
  
 require(DOSE)
