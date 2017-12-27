@@ -228,7 +228,7 @@ biocLite("clusterProfiler")
 ## My R version is R_3.4.3 , so I choose the Rtools34, there is anterior version of Rtools33. I choose to install the Rtools34 mapping to my R version. But sadly, it turns out completely different from my previous experience(https://github.com/starpiratewl/NLM_test/blob/master/install_R_packages). Because two main problems:
 ## 1. there are no gcc director in the Rtools root
 ## 2. problem one lead to the environment setting in windows, we can not set the gcc_version number parameters
-
+## (like in http://blog.csdn.net/wzgl__wh/article/details/70185687)
 ## the result is we installed the rtools successfully, we can not compile any tar.gz packages.
 ## in R gui terminator , we type following:
 ## system('g++ -v')
@@ -236,6 +236,12 @@ biocLite("clusterProfiler")
 ## There is not error message pop out, so it means we have installed the Rtools
 ## but in cmd interface. We use "rcmd INSTALL package_name.tar.gz" command , but it turns out it can not install any package.
 
+## at first I attributed this errpr to the wrong installation of Rtools, the following links provide valuable information about Rtools installation
+
+http://bbs.pinggu.org/thread-1128344-1-1.html
+http://blog.csdn.net/learneraiqi/article/details/46343583
+
+## But I can find any solution to make Rtools function properly in my conputer.
 ## So I doubt that the reason is I choose the wrong Rtools version. So I decide to roll back to Rtools33 and change the R version to 3.3.3. But surprisingly it solve all the problems. 
 
 
@@ -245,16 +251,22 @@ biocLite("clusterProfiler")
 ###################################################################
 setwd("D:\\wangliang\\project\\ww\\201712pathway")
 
+
+matn3_list <- read.csv(file = "matn3.txt", sep = "\t", stringsAsFactors = F)
+
+
+library("org.Hs.eg.db")
+library("GSEABase")
+library("GOstats")
+
+
+
+
 library(clusterProfiler)
 
-a=read.table("testgeneid.txt",header = FALSE)
- 
-require(DOSE)
- 
-require(clusterProfiler)
- 
-gene=as.character(a[,1])
- 
+
+gene=as.character(matn3_list[,3])
+
 ego <- enrichGO(gene=gene,'org.Hs.eg.db',ont="BP",pvalueCutoff=0.01,readable=TRUE)
  
 ekk <- enrichKEGG(gene=gene,organism = "hsa",pAdjustMethod = "BH",pvalueCutoff=0.01)
@@ -269,7 +281,26 @@ dotplot(ego,title="EnrichmentGO_dot")
 
 
 
+############################################################
 
+
+#没有organism="human"，改为OrgDb=org.Hs.eg.db,就不会有问题啦~~~
+ego <- enrichGO(gene = gene,
+                   OrgDb=org.Hs.eg.db,
+                   ont = "CC",
+                   pAdjustMethod = "BH",
+                   minGSSize = 1,
+                   pvalueCutoff = 0.01,
+                   qvalueCutoff = 0.01,
+                   readable = TRUE)
+write.table(as.data.frame( ego_CC@result), file="test_CC.txt")
+#KEGG又不一样,它就可以用
+ekk <- enrichKEGG(gene = gene, organism ="hsa",
+                 pvalueCutoff = 0.1,
+                 qvalueCutoff = 0.1,
+                 minGSSize = 1,
+                 #readable = TRUE ,
+                 use_internal_data =FALSE)
 
 
 
