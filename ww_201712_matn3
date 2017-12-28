@@ -303,15 +303,6 @@ ekk <- enrichKEGG(gene = gene, organism ="hsa",
                  use_internal_data =FALSE)
 
 
-
-
-
-
-
-
-
-
-
 ############################################################################################################
 ## pathview
 
@@ -388,6 +379,42 @@ pv.out <- pathview(gene.data=P533_gene_data, gene.idtype="SYMBOL",pathway.id="04
 PI3KK_gene_data <- PI3KK_tab$Log.Fold.change
 names(PI3KK_gene_data) <- PI3KK_tab$XX
 pv.out <- pathview(gene.data=PI3KK_gene_data, gene.idtype="SYMBOL",pathway.id="04151", species="hsa", kegg.native=TRUE)
+
+
+
+
+
+
+
+
+
+############################################################################################################
+## option 2  -----   ReactomePA
+source("https://bioconductor.org/biocLite.R")
+biocLite("ReactomePA")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
