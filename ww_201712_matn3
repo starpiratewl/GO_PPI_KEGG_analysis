@@ -244,6 +244,20 @@ http://blog.csdn.net/learneraiqi/article/details/46343583
 ## But I can find any solution to make Rtools function properly in my conputer.
 ## So I doubt that the reason is I choose the wrong Rtools version. So I decide to roll back to Rtools33 and change the R version to 3.3.3. But surprisingly it solve all the problems. 
 
+## installation of Rtools33\
+##
+## 1. The most important step is install the Rtools which provide the compiling environment needed.
+
+## 2. After the installation of Rtools33(This time we choose to install it in the D: root director to avoid the embarrassment of term 6), we have to modify the environment values . Make sure the PATH value are like follows:
+C:\R\R-3.2.5\bin\x64;C:\Rtools\bin;C:\Rtools\mingw_64\bin;C:\Rtools\gcc-4.6.3\bin;%SystemRoot%\system32;%SystemRoot%;%SystemRoot%\System32\Wbem;%SYSTEMROOT%\System32\WindowsPowerShell\v1.0\
+
+## 3. copy the downloaded tar.gz files to "C:\R\R-3.2.5\bin\x64", be careful this path should already added to the path environment value.
+
+## 4. open cmd window in WIN7(win+R, cmd), change the directory to "C:\R\R-3.2.5\bin\x64"
+
+## 5. execute "rcmd INSTALL **.tar.gz", and the packages will be installed.
+
+## 6. There is a pitfull here: at first I install the R in the default directory "C:\Program Files\R\R-3.2.5\bin\x64", when I add this path to PATH environment value, it seems that the environment does not recognize this path at all. Each execution will stop at "C:\Program " is not recognized in the system. So I guess in the path it not allow the space occur. So I change the installation directory of R, avoid space in the path, and finally it works...
 
 
 ###################################################################
@@ -393,7 +407,7 @@ pv.out <- pathview(gene.data=PI3KK_gene_data, gene.idtype="SYMBOL",pathway.id="0
 source("https://bioconductor.org/biocLite.R")
 biocLite("ReactomePA")
 
-
+## installation of ReactomePA is infeasible under my poor connection environment. Because ReactomePA depend a very big package reactome.db which is more than 500mb, I try many times but I cannot download it in R. So I choose to download it from Bioconductor website directly and install the binary file with the help of Rtools.(Downloading binary packages directly from Bioconductor website is also very slow, after all, I can finish the downloading...)
 
 
 
