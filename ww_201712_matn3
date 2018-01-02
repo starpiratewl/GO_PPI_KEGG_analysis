@@ -407,11 +407,23 @@ pv.out <- pathview(gene.data=PI3KK_gene_data, gene.idtype="SYMBOL",pathway.id="0
 source("https://bioconductor.org/biocLite.R")
 biocLite("ReactomePA")
 
-## installation of ReactomePA is infeasible under my poor connection environment. Because ReactomePA depend a very big package reactome.db which is more than 500mb, I try many times but I cannot download it in R. So I choose to download it from Bioconductor website directly and install the binary file with the help of Rtools.(Downloading binary packages directly from Bioconductor website is also very slow, after all, I can finish the downloading...)
+## installation of ReactomePA is infeasible under my poor connection environment. Because ReactomePA depend a very big package reactome.db which is more than 500mb, I try many times but I cannot download it in R. So I choose to download it from Bioconductor website directly and install the binary file with the help of Rtools.(Downloading binary packages directly from Bioconductor website is also very slow, after all, I can finish the downloading...use thunder software is very helpful)
 
+## if choose this approach, please be very careful of the versions of the dependent packages. For example here, ReactomePA is 1.18.1 and reactome.db is 1.58
 
+###########################################
+## This is ReactomePA test code
+###########################################
+library(ReactomePA)
+data(geneList)
+de <- names(geneList)[abs(geneList) > 1.5]
+head(de)
+x <- enrichPathway(gene=de,pvalueCutoff=0.05, readable=T)
+head(as.data.frame(x))
 
+barplot(x, showCategory=8)
 
+enrichMap(x, layout=igraph::layout.kamada.kawai, vertex.label.cex = 1)
 
 
 
