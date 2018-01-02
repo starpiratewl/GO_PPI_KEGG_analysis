@@ -414,16 +414,83 @@ biocLite("ReactomePA")
 ###########################################
 ## This is ReactomePA test code
 ###########################################
+## 1 pathway enrichment analysis
 library(ReactomePA)
 data(geneList)
 de <- names(geneList)[abs(geneList) > 1.5]
 head(de)
-x <- enrichPathway(gene=de,pvalueCutoff=0.05, readable=T)
+x <- enrichPathway(gene=de,pvalueCutoff=0.05, readable=T, organism='human')
 head(as.data.frame(x))
 
+## 2 visualize enrichment result
 barplot(x, showCategory=8)
 
 enrichMap(x, layout=igraph::layout.kamada.kawai, vertex.label.cex = 1)
+
+cnetplot(x, categorySize="pvalue", foldChange=geneList)
+
+
+
+## 3 Comparing enriched reactome pathways among gene clusters with clusterProfiler
+require(clusterProfiler)
+data(gcSample)
+res <- compareCluster(gcSample, fun="enrichPathway")
+plot(res)
+
+
+## 4 GSEA analysis
+y <- gsePathway(geneList, nPerm=1000,
+                minGSSize=120, pvalueCutoff=0.2,
+                pAdjustMethod="BH", verbose=FALSE)
+res <- as.data.frame(y)
+head(res)
+
+## 4.1 visualize GSEA result
+enrichMap(y)
+
+gseaplot(y, geneSetID = "1474244")
+
+
+## 5 pathway visualization
+viewPathway("E2F mediated regulation of DNA replication", readable=TRUE, foldChange=geneList)
+
+
+###########################################
+## This is the code in our project
+###########################################
+## This is a very helpful tools
+## rvcheck can check and update the packages in CRAN, Bioconductor and Github
+install.packages("rvcheck")
+## rvcheck check all the packages
+rvcheck::update_all()
+## rvcheck check the specific packages
+rvcheck::check_bioc("ReactomePA")
+
+setwd("D:\\wangliang\\project\\ww\\201712pathway")
+
+matn3_list <- read.csv(file = "matn3.txt", sep = "\t", stringsAsFactors = F)
+matn3_tab <- matn3_list[!is.na(matn3_list$EntresID),]
+de1 <- matn3_tab$EntresID
+de1 <- as.character(de1)
+
+write.table(de1, file = "ww_de_geneid.txt", sep = "\t", quote = F, col.names = F, row.names = F)
+
+
+x1 <- enrichPathway(gene=de1,pvalueCutoff=0.05, readable=T, organism='human')
+head(as.data.frame(x1))
+
+
+
+
+library("org.Hs.eg.db")
+library("GSEABase")
+library("GOstats")
+
+
+
+
+
+
 
 
 
