@@ -281,10 +281,15 @@ library(clusterProfiler)
 
 gene=as.character(matn3_list[,3])
 
-ego <- enrichGO(gene=gene,'org.Hs.eg.db',ont="BP",pvalueCutoff=0.01,readable=TRUE)
+genenone <- gene[!is.na(gene)]
+
+
+ego <- enrichGO(gene=genenone,'org.Hs.eg.db',ont="BP",pvalueCutoff=0.05,readable=TRUE)
  
-ekk <- enrichKEGG(gene=gene,organism = "hsa",pAdjustMethod = "BH",pvalueCutoff=0.01)
- 
+ekk <- enrichKEGG(gene=genenone,organism = "human",pAdjustMethod = "BH",pvalueCutoff=0.05, readable = T)
+ekk <- enrichKEGG(gene=genenone,organism = "human",pvalueCutoff=0.05)
+
+
 write.csv(summary(ekk),"KEGG-enrich.csv",row.names =F)
  
 write.csv(summary(ego),"GO-enrich.csv",row.names =F)
@@ -503,17 +508,6 @@ library("GOstats")
 
 ## http://www.mybiosoftware.com/kobas-2-0-annotation-identification-enriched-pathways-diseases.html
 ## http://blog.sina.com.cn/s/blog_65ba09d90101g1as.html
-
-
-
-
-
-
-
-
-
-
-
 
 
 
